@@ -1,0 +1,49 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.5'
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com.lyc'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-logging'
+    implementation 'ch.qos.logback:logback-classic:1.4.11'
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    //org.json.JSONObject
+    implementation 'org.json:json:20231013'
+    //org.jsoup.Jsoup
+    implementation 'org.jsoup:jsoup:1.14.3'
+    //hutool-http
+    implementation 'cn.hutool:hutool-http:5.7.10'
+    implementation 'org.apache.commons:commons-compress:1.21'
+    implementation 'net.sf.sevenzipjbinding:sevenzipjbinding:16.02-2.01'
+    implementation 'net.sf.sevenzipjbinding:sevenzipjbinding-all-platforms:16.02-2.01'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
