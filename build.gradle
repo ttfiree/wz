@@ -42,6 +42,11 @@ dependencies {
     implementation 'org.apache.commons:commons-compress:1.21'
     implementation 'net.sf.sevenzipjbinding:sevenzipjbinding:16.02-2.01'
     implementation 'net.sf.sevenzipjbinding:sevenzipjbinding-all-platforms:16.02-2.01'
+    implementation 'org.xerial:sqlite-jdbc:3.41.2.2' // 添加 SQLite JDBC 驱动
+    implementation 'com.baomidou:mybatis-plus-boot-starter:3.5.9'
+    implementation 'com.baomidou:mybatis-plus-generator:3.5.9'
+    implementation 'org.freemarker:freemarker:2.3.31'
+
 }
 
 tasks.named('test') {
