@@ -2,29 +2,32 @@ package com.lyc.wangzhan.controller.impl;
 
 import cn.hutool.http.HttpUtil;
 import com.lyc.wangzhan.controller.VideoController;
-import com.lyc.wangzhan.utils.HttpRequestUtil;
-import com.lyc.wangzhan.utils.IOTransUtil;
-import com.lyc.wangzhan.utils.PathUtil;
+import com.lyc.wangzhan.utils.*;
+import com.lyc.wangzhan.video.TotalService;
 import com.lyc.wangzhan.video.VideoService;
 import com.lyc.wangzhan.video.VideoServiceNew;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpCookie;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.lyc.wangzhan.utils.PathUtil.compressTo7z;
 
 @RestController( "/video")
 @RequestMapping("/video")
@@ -33,15 +36,37 @@ public class VideoControllerImpl implements VideoController {
     private VideoServiceNew videoService;
     @Autowired
     private RestTemplate restTemplate;
+    @Autowired
+    private TotalService totalService;
+    @Autowired
+    private HttpHeaders httpHeaders;
+
+    @Value("${cookie}")
+    private String cookie;
 
     @Override
-    public void downloadImg(String urls) throws IOException {
+    public void downloadImg(List<String> urls) throws IOException {
+
         //https://www.bilibili.com/video/BV1X4DpYnExZ/?spm_id_from=333.1007.tianma.2-3-6.click 提取1X4DpYnExZ
-        String bv = urls.substring(urls.indexOf("BV"), urls.indexOf("?"));
-        //如果末尾是/，去掉/
-        if (bv.endsWith("/")) {
-            bv = bv.substring(0, bv.length() - 1);
+        for (String url : urls) {
+            String bv = url;
+            //如果末尾是/，去掉/
+            if (bv.endsWith("/")) {
+                bv = bv.substring(0, bv.length() - 1);
+            }
+            try{
+                download(bv);
+            }catch (Exception e){
+                //重试
+                download(bv);
+            }
+
         }
+
+
+    }
+
+    private void download(String bv) throws IOException {
         long start = System.currentTimeMillis();
         //get请求https://api.bilibili.com/x/web-interface/wbi/view 参数bvid
         String videoUrl = "https://api.bilibili.com/x/web-interface/view?bvid=" + bv;
@@ -51,19 +76,67 @@ public class VideoControllerImpl implements VideoController {
         String avid = String.valueOf(videoJson.getJSONObject("data").getLong("aid"));
         String cid = String.valueOf(videoJson.getJSONObject("data").getLong("cid"));
         String title = videoJson.getJSONObject("data").getString("title");
+        String name = videoJson.getJSONObject("data").getJSONObject("owner").getString("name");
+        title = title + "-" + name;
         String picurl = videoJson.getJSONObject("data").getString("pic");
         // 根据cid拼接成完整的请求参数,并执行下载操作
-        videoService.downloadMovie(avid, cid,title);
+        videoService.downloadMovie(avid, cid,title,bv);
         //urls = https://www.bilibili.com/video/BV1X4DpYnExZ/?spm_id_from=333.1007.tianma.2-3-6.click 使用正则提取BV1X4DpYnExZ
         videoService.downloadImage(picurl, PathUtil.createImagePath(picurl,title));
-        PathUtil.compressTo7z(title);
+        //PathUtil.compressTo7z(title);
         long end = System.currentTimeMillis();
-        System.err.println("总共耗时：" + (end - start) / 1000 + "s");
+        System.out.println("下载完成，耗时：" + (end - start) / 1000 + "秒");
     }
 
     @Override
     public void compressTo7z(String title) {
-        PathUtil.compressTo7z(title);
+       // PathUtil.copyFile(title);
+        PathUtil.moveFile(title);
+        //PathUtil.compressFolder(title);
+    }
+
+    @Override
+    public void list(String spaceId) throws IOException {
+        Connection connection = Jsoup.connect(spaceId)
+                .headers(httpHeaders.getCommonHeaders("space.bilibili.com"))
+                .timeout(10000)
+                .followRedirects(true);
+
+        // 添加cookie（如果需要）
+        // 执行请求
+            Document document = connection.get();
+
+        List<String> avids = new ArrayList<>();
+        // 转换XPath为CSS选择器
+        // xpath: /html/body/div[2]/div[4]/div/div/div[2]/div[4]/div/div/ul[2]/li
+        Elements liElements = document.select("#submit-video-list > ul.clearfix.cube-list > li");
+
+        for (Element li : liElements) {
+            String avid = li.attr("data-avid"); // 假设avid存储在data-avid属性中
+            // 或者其他属性
+            // String avid = li.id();  // 如果存储在id中
+            // String avid = li.attr("aid");  // 如果存储在aid属性中
+
+            if (avid != null && !avid.isEmpty()) {
+                avids.add(avid);
+            }
+        }
+        System.out.println(avids);
+    }
+    public void getAid(String url) {
+        String html = HttpUtil.get(url);
+        Document document = Jsoup.parse(html);
+        //获取data-aid属性值
+        document.select("//*[@id=\"submit-video-list\"]/ul[2]/li[]").forEach(element -> {
+            System.out.println(element.attr("data-aid"));
+        });
+    }
+
+
+    public static void main(String[] args) {
+        String cookieConfig = "sid=oepgnjf8, DedeUserID__ckMd5=e5218b17dbdb0f5d, DedeUserID=315275999, bili_jct=5881ec5cfb37d96b7751987fccaabd49, SESSDATA=413dd822%2C1746551129%2Cbd1ba%2Ab2CjA4bLJEEitVhNneEMbCUU6wIn0Dk7TppClXqHm59yj16Zg4C8jbfLyQ9ayvhIXyj5ISVl9uUXBEeXFPcFp3YkVXc09IUF9ZZDFlcWpiVV9DRWlEbTVwOGZpZktaVVNwT3FmNWE0M0hEQzIzSVI2cnFtWkExV1hIcklKc0JvNVFSWHVkRWJ1amZRIIEC\n22fe8792c176db0b11611e3b1f65ccb2";
+        List<HttpCookie> cookies = HttpCookies.convertCookies(cookieConfig);
+        System.out.println(cookies);
     }
 
 

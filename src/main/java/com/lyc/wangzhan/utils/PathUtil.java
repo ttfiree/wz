@@ -10,19 +10,26 @@ import java.io.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PathUtil {
-    private static String path = "D:\\Bilibili";
+    private static String path = "N:\\Bilibili";
+    private static String pathPic = "N:\\Bilibilipic";
 
-    private static String outPath = "D:\\BiliBiliOutput";
+    private static String outPath = "N:\\BiliBiliOutput";
 
     //创建图片路径
     public static String createImagePath(String cover,String title) {
         System.out.println("开始创建图片路径");
         //图片名称
-        String imgName = cover.substring(cover.lastIndexOf("/") + 1);
+        String imgName = title + ".jpg";
         //创建路径
-        File dir = new File(path);
+        File dir = new File(pathPic);
         if (!dir.exists()) {
             dir.mkdirs();
         }
@@ -46,8 +53,10 @@ public class PathUtil {
         if (!dir.exists()) {
             dir.mkdirs();
         }
+        //title用-分割取第二个
+        String[] titles = title.split("-");
         //使用title创建文件夹
-        File titleDir = new File(dir + File.separator + title);
+        File titleDir = new File(dir + File.separator + titles[1]);
         if (!titleDir.exists()) {
             titleDir.mkdirs();
         }
@@ -56,82 +65,119 @@ public class PathUtil {
         return fileName;
     }
     //将文件夹7z压缩
-    public static void compressTo7z(String title) {
-        String folderPath = path + File.separator + title;
-        String outputPath = outPath + File.separator + title;
-        File dir = new File(outputPath);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        File folder = new File(folderPath);
-        if (!folder.exists()) {
-            folder.mkdirs();
-        }
-
-        File[] files = folder.listFiles();
-        if (files == null) {
-            throw new IllegalArgumentException("Folder is empty or inaccessible");
-        }
-
-        try (RandomAccessFile raf = new RandomAccessFile(outputPath, "rw");
-             IOutCreateArchive7z outArchive = SevenZip.openOutArchive7z()) {
-
-            outArchive.setLevel(5); // Compression level (0-9)
-            outArchive.createArchive(new RandomAccessFileOutStream(raf), files.length, new IOutCreateCallback<IOutItemAllFormats>() {
-
-                @Override
-                public void setOperationResult(boolean operationResultOk) {
-                    // Handle operation result
-                }
-
-                @Override
-                public IOutItemAllFormats getItemInformation(int index, OutItemFactory<IOutItemAllFormats> outItemFactory) {
-                    IOutItemAllFormats item = outItemFactory.createOutItem();
-                    item.setDataSize(files[index].length());
-                    item.setPropertyPath(files[index].getName());
-                    return item;
-                }
-
-                @Override
-                public ISequentialInStream getStream(int index) throws SevenZipException {
-                    return new ISequentialInStream() {
-                        FileInputStream inputStream;
-
-                        {
-                            try {
-                                inputStream = new FileInputStream(files[index]);
-                            } catch (FileNotFoundException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-
-                        @Override
-                        public int read(byte[] data) throws SevenZipException {
-                            try {
-                                return inputStream.read(data);
-                            } catch (IOException e) {
-                                throw new SevenZipException("Error reading file", e);
-                            }
-                        }
-
-                        @Override
-                        public void close() throws IOException {
-                            inputStream.close();
-                        }
-                    };
-                }
-
-                @Override
-                public void setTotal(long total) {
-                    // Implement the method
-                }
-
-                @Override
-                public void setCompleted(long complete) {
-                    // Implement the method
-                }
-            });
+    public static void compressFolder(String title) {
+        String folderPath = outPath + File.separator + title;
+        String archivePath = outPath + File.separator + title + ".7z";
+        try {
+            ZipFileUtil.zip7z(folderPath, archivePath, title);
         } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
+    //复制文件到指定路径
+    public static void copyFile(String title) {
+        String oldPath = "N:\\哔哩-Fun - 充电视频的搬运工.html";
+        // 获取源文件名
+        File oldFile = new File(oldPath);
+        String fileName = oldFile.getName();
+
+        String pathPicc = pathPic + File.separator + title;
+        //遍历pathPic下的所有文件夹
+        File file = new File(pathPicc);
+        File[] files = file.listFiles();
+        for (File file1 : files) {
+            //获取文件夹名称
+            String folderName = file1.getName();
+            //将oldPath复制到pathPic下的文件夹
+            String targetFilePath = pathPicc + File.separator + folderName+File.separator+"哔哩-Fun - 充电视频的搬运工.html";
+            copy(oldFile,oldPath, targetFilePath);
+
+
+        }
+    }
+
+    //移动视频到文件夹
+    public static void moveFile(String title) {
+        String oldPath = "N:\\BiliBiliOutput\\video";
+        // 获取源文件名
+        File oldFile = new File(oldPath);
+        File[] files = oldFile.listFiles();
+        //打开目标文件夹
+        String pathPicc = pathPic + File.separator + title;
+        File file2 = new File(pathPicc);
+        File[] files1 = file2.listFiles();
+        for (File file : files) {
+            //获取文件名
+            String fileName = file.getName();
+            for (File file1 : files1) {
+                if(fileName.contains(file1.getName())){
+                    //将文件移动到pathPic下的文件夹
+                    String targetFilePath = pathPicc + File.separator +file1.getName()+File.separator+ fileName;
+                    moveUsingFilesMove(oldPath+ File.separator+fileName, targetFilePath);
+                }
+            }
+        }
+    }
+    //移动文件
+    /**
+     * 复制文件的方法，优化了缓冲区大小和使用缓冲流
+     *
+     * @param oldFile 源文件对象
+     * @param oldPath 源文件路径
+     * @param newPath 目标文件路径
+     */
+    private static void move(File oldFile, String oldPath, String newPath) {
+        final int BUFFER_SIZE = 16 * 1024; // 16KB 缓冲区
+        try {
+            if (oldFile.exists()) {
+                try (BufferedInputStream inStream = new BufferedInputStream(new FileInputStream(oldPath), BUFFER_SIZE);
+                     BufferedOutputStream outStream = new BufferedOutputStream(new FileOutputStream(newPath), BUFFER_SIZE)) {
+
+                    byte[] buffer = new byte[BUFFER_SIZE];
+                    int bytesRead;
+                    while ((bytesRead = inStream.read(buffer)) != -1) {
+                        outStream.write(buffer, 0, bytesRead);
+                    }
+                    outStream.flush(); // 确保所有数据都写入
+                }
+            } else {
+                throw new FileNotFoundException("源文件未找到: " + oldPath);
+            }
+        } catch (Exception e) {
+            System.out.println("复制文件操作出错: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private static void moveUsingFilesMove(String oldPath, String newPath) {
+        Path source = Paths.get(oldPath);
+        Path target = Paths.get(newPath);
+
+        try {
+            Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("文件已成功移动到: " + newPath);
+        } catch (IOException e) {
+            System.out.println("移动文件操作出错: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    private static void copy(File oldFile,String oldPath, String newPath) {
+        try {
+            Path source = Paths.get(oldPath);
+            Path target = Paths.get(newPath);
+
+            try {
+                Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+                System.out.println("文件已成功移动到: " + newPath);
+            } catch (IOException e) {
+                System.out.println("移动文件操作出错: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            System.out.println("复制文件操作出错: " + e.getMessage());
             e.printStackTrace();
         }
     }

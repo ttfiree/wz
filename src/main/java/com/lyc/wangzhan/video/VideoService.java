@@ -7,6 +7,7 @@ public interface VideoService {
     void initPageQueryParam();
 
 
+
     VideoInfo result(int pageSize, int page, Object... obj);
 
 }

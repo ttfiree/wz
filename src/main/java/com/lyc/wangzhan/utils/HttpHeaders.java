@@ -1,8 +1,10 @@
 package com.lyc.wangzhan.utils;
 
+import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 
-
+@Component
 public class HttpHeaders {
 	HashMap<String, String> headerMap = new HashMap<String, String>();
 	private static HashMap<String, String> userInfoHeaderMap = null;
