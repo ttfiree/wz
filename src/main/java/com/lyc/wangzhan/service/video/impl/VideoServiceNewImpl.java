@@ -1,13 +1,10 @@
-package com.lyc.wangzhan.video.impl;
+package com.lyc.wangzhan.service.video.impl;
 
 import com.lyc.wangzhan.utils.*;
-import com.lyc.wangzhan.video.VideoServiceNew;
-import lombok.val;
+import com.lyc.wangzhan.service.video.VideoServiceNew;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import cn.hutool.http.HttpUtil;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,17 +18,13 @@ import java.util.Map;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import static com.lyc.wangzhan.utils.HttpCookies.genNewFingerprint;
 
 @Service
 public class VideoServiceNewImpl implements VideoServiceNew {

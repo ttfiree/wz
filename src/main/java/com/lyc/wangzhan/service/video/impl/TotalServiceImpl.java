@@ -1,7 +1,7 @@
-package com.lyc.wangzhan.video.impl;
+package com.lyc.wangzhan.service.video.impl;
 
 import com.lyc.wangzhan.utils.*;
-import com.lyc.wangzhan.video.TotalService;
+import com.lyc.wangzhan.service.video.TotalService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +10,6 @@ import org.springframework.stereotype.Service;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.lyc.wangzhan.utils.API.encodeURL;

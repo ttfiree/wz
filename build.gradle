@@ -9,7 +9,7 @@ version = '0.0.1-SNAPSHOT'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -63,6 +63,12 @@ dependencies {
     implementation 'commons-io:commons-io:2.11.0'
     //fastjson
     implementation 'com.alibaba:fastjson:1.2.78'
+    //wp-api-v2-client-java4.8.1
+    implementation 'com.afrozaar.wordpress:wp-api-v2-client-java:4.8.1'
+    //org.apache.commons.imaging
+    implementation 'org.apache.commons:commons-imaging:1.0-alpha3'
+    //metadata-extractor
+    implementation 'com.drewnoakes:metadata-extractor:2.18.0'
 }
 
 tasks.named('test') {

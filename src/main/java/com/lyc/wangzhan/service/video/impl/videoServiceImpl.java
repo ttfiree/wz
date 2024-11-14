@@ -1,4 +1,4 @@
-package com.lyc.wangzhan.video.impl;
+package com.lyc.wangzhan.service.video.impl;
 
 import com.lyc.wangzhan.dto.ClipInfo;
 import com.lyc.wangzhan.dto.VideoInfo;
@@ -10,8 +10,7 @@ import com.lyc.wangzhan.utils.API;
 import com.lyc.wangzhan.utils.HttpCookies;
 import com.lyc.wangzhan.utils.HttpHeaders;
 import com.lyc.wangzhan.utils.HttpRequestUtil;
-import com.lyc.wangzhan.video.VideoService;
-import org.slf4j.Logger;
+import com.lyc.wangzhan.service.video.VideoService;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 

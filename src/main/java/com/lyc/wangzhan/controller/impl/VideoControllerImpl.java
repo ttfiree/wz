@@ -2,13 +2,12 @@ package com.lyc.wangzhan.controller.impl;
 
 import cn.hutool.http.HttpUtil;
 import com.lyc.wangzhan.controller.VideoController;
-import com.lyc.wangzhan.entity.Video;
-import com.lyc.wangzhan.login.LoginService;
+import com.lyc.wangzhan.service.login.LoginService;
 import com.lyc.wangzhan.mapper.VideoMapper;
+import com.lyc.wangzhan.service.wordpress.WordpressService;
 import com.lyc.wangzhan.utils.*;
-import com.lyc.wangzhan.video.TotalService;
-import com.lyc.wangzhan.video.VideoService;
-import com.lyc.wangzhan.video.VideoServiceNew;
+import com.lyc.wangzhan.service.video.TotalService;
+import com.lyc.wangzhan.service.video.VideoServiceNew;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Connection;
@@ -28,7 +27,6 @@ import java.net.HttpCookie;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -53,6 +51,8 @@ public class VideoControllerImpl implements VideoController {
 
     @Autowired
     private LoginService loginService;
+    @Autowired
+    private WordpressService wordpressService;
     @Override
     public void downloadImg(List<String> urls) throws IOException {
 
@@ -101,7 +101,7 @@ public class VideoControllerImpl implements VideoController {
     public void compressTo7z(String title) {
        // PathUtil.copyFile(title);
         PathUtil.moveFile(title);
-        //PathUtil.compressFolder(title);
+        PathUtil.compressFolder(title);
     }
 
     @Override
@@ -135,7 +135,8 @@ public class VideoControllerImpl implements VideoController {
 
     @Override
     public void test(String spaceId) throws IOException {
-        loginService.shareRun(spaceId);
+        //loginService.shareRun(spaceId);
+        wordpressService.uploadMedia(spaceId);
     }
 
     public void getAid(String url) {

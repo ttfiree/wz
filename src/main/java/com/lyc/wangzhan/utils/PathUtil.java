@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +23,11 @@ public class PathUtil {
     private static String pathPic = "N:\\Bilibilipic";
 
     private static String outPath = "N:\\BiliBiliOutput";
+
+    private static String quarkPath = "N:\\网站";
+
+    private static String downLoadPath = "N:\\下载";
+    private static String dealPath = "N:\\待压缩";
 
     //创建图片路径
     public static String createImagePath(String cover,String title) {
@@ -67,13 +73,41 @@ public class PathUtil {
     //将文件夹7z压缩
     public static void compressFolder(String title) {
         String folderPath = outPath + File.separator + title;
-        String archivePath = outPath + File.separator + title + ".7z";
+        //获取当前日期yyyy-MM-dd
+        String date = LocalDate.now().toString();
+        //在outPath + File.separator下创建日期文件夹
+        File dateDir = new File(outPath + File.separator + date);
+        if (!dateDir.exists()) {
+            dateDir.mkdirs();
+        }
+        String archivePath = outPath + File.separator +date+File.separator+ title + ".7z";
         try {
             ZipFileUtil.zip7z(folderPath, archivePath, title);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+    public static void compressFolderDownload(String title) {
+        String folderPath = downLoadPath + File.separator + title;
+        //获取当前日期yyyy-MM-dd
+        String date = LocalDate.now().toString();
+        //在outPath + File.separator下创建日期文件夹
+        File dateDir = new File(dealPath + File.separator + date);
+        if (!dateDir.exists()) {
+            dateDir.mkdirs();
+        }
+        String archivePath = dealPath + File.separator +date+File.separator+ title + ".7z";
+        String oldPath = "N:\\哔哩-Fun - 充电视频的搬运工.html";
+        // 获取源文件名
+        File oldFile = new File(oldPath);
+        moveUsingFilesMove(oldPath,folderPath);
+        try {
+            ZipFileUtil.zip7z(folderPath, archivePath, title);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
 
 
@@ -102,11 +136,23 @@ public class PathUtil {
     //移动视频到文件夹
     public static void moveFile(String title) {
         String oldPath = "N:\\BiliBiliOutput\\video";
+        moveFile(title, oldPath);
+
+    }
+
+    public static void moveFile(String title, String oldPath) {
         // 获取源文件名
         File oldFile = new File(oldPath);
         File[] files = oldFile.listFiles();
         //打开目标文件夹
-        String pathPicc = pathPic + File.separator + title;
+        //获取当前日期yyyy-MM-dd
+        String date = LocalDate.now().toString();
+        //在outPath + File.separator下创建日期文件夹
+        File dateDir = new File(outPath + File.separator + date);
+        if (!dateDir.exists()) {
+            dateDir.mkdirs();
+        }
+        String pathPicc = pathPic + File.separator +date+File.separator+ title;
         File file2 = new File(pathPicc);
         File[] files1 = file2.listFiles();
         for (File file : files) {
@@ -121,36 +167,24 @@ public class PathUtil {
             }
         }
     }
-    //移动文件
-    /**
-     * 复制文件的方法，优化了缓冲区大小和使用缓冲流
-     *
-     * @param oldFile 源文件对象
-     * @param oldPath 源文件路径
-     * @param newPath 目标文件路径
-     */
-    private static void move(File oldFile, String oldPath, String newPath) {
-        final int BUFFER_SIZE = 16 * 1024; // 16KB 缓冲区
-        try {
-            if (oldFile.exists()) {
-                try (BufferedInputStream inStream = new BufferedInputStream(new FileInputStream(oldPath), BUFFER_SIZE);
-                     BufferedOutputStream outStream = new BufferedOutputStream(new FileOutputStream(newPath), BUFFER_SIZE)) {
-
-                    byte[] buffer = new byte[BUFFER_SIZE];
-                    int bytesRead;
-                    while ((bytesRead = inStream.read(buffer)) != -1) {
-                        outStream.write(buffer, 0, bytesRead);
-                    }
-                    outStream.flush(); // 确保所有数据都写入
-                }
-            } else {
-                throw new FileNotFoundException("源文件未找到: " + oldPath);
-            }
-        } catch (Exception e) {
-            System.out.println("复制文件操作出错: " + e.getMessage());
-            e.printStackTrace();
+    public static void moveFileQuark(String title) {
+        // 获取源文件名
+        String date = LocalDate.now().toString();
+        String oldPath = dealPath+ File.separator + date;
+        File oldFile = new File(dealPath+ File.separator + date+ File.separator + title+ ".7z");
+        //在outPath + File.separator下创建日期文件夹
+        File dateDir = new File(quarkPath + File.separator + date);
+        if (!dateDir.exists()) {
+            dateDir.mkdirs();
         }
+        String pathPicc = quarkPath + File.separator +date;
+        File file2 = new File(pathPicc);
+                    //将文件移动到pathPic下的文件夹
+                    String targetFilePath = pathPicc + File.separator +oldFile.getName()+ ".7z";
+                    moveUsingFilesMove(oldPath+ File.separator+oldFile.getName()+ ".7z", targetFilePath);
+
     }
+
 
     private static void moveUsingFilesMove(String oldPath, String newPath) {
         Path source = Paths.get(oldPath);
@@ -181,4 +215,7 @@ public class PathUtil {
             e.printStackTrace();
         }
     }
+
+
+
 }

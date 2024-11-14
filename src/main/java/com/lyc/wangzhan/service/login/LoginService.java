@@ -1,4 +1,4 @@
-package com.lyc.wangzhan.login;
+package com.lyc.wangzhan.service.login;
 
 public interface LoginService {
 

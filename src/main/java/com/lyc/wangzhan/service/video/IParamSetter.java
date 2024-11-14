@@ -1,4 +1,4 @@
-package com.lyc.wangzhan.video;
+package com.lyc.wangzhan.service.video;
 
 public interface IParamSetter {
 

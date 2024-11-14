@@ -1,4 +1,4 @@
-package com.lyc.wangzhan.video;
+package com.lyc.wangzhan.service.video;
 
 import com.lyc.wangzhan.dto.VideoInfo;
 
