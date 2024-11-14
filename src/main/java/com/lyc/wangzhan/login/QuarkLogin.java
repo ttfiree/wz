@@ -2,8 +2,11 @@ package com.lyc.wangzhan.login;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lyc.wangzhan.entity.Video;
+import com.lyc.wangzhan.mapper.VideoMapper;
 import com.microsoft.playwright.*;
 import org.json.JSONArray;
 import org.slf4j.Logger;
@@ -31,6 +34,9 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
+import com.lyc.wangzhan.constant.CommonConstant;
+
 @Service
 public class QuarkLogin implements LoginService{
 
@@ -45,6 +51,8 @@ public class QuarkLogin implements LoginService{
 
     @Autowired
     private RestTemplate restTemplate;
+    @Autowired
+    private VideoMapper videoMapper;
 
 
     private void setHeaders(){
@@ -314,28 +322,38 @@ public class QuarkLogin implements LoginService{
                 JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(jsonData.get("data")));
                 List<Map<String, Object>> list = (List<Map<String, Object>>) jsonObject.get("list");
                 for (Map<String, Object> i1 : list) {
-                        firstDir = (String) i1.get("file_name");
+                    secondDir = (String) i1.get("file_name");
+                    //secondDir截取.前面的字符串
+                    String secondDir1 = secondDir.substring(0, secondDir.lastIndexOf("."));
                                     boolean shareSuccess = false;
                                     String shareErrorMsg = "";
                                     String fid = "";
+                    Video video = new Video();
+                    video.setName(secondDir1);
+                    video.setIs_del(0);
+                    video = videoMapper.selectOne(new QueryWrapper(video));
+                    if(video == null){
+                        video = new Video();
+                        video.setName(secondDir1);
+                        video.setIs_del(0);
+                        video.setCreateTime(new Date());
+                        videoMapper.insert(video);
+                    }
                                         try {
-                                            secondDir = (String) i1.get("file_name");
-                                            logger.info(n + ".开始分享 " + firstDir + "/" + secondDir + " 文件夹");
+                                            logger.info(n + ".开始分享 " + secondDir + " 文件夹");
                                             Thread.sleep((long) (Math.random() * 1500 + 500));
                                             fid = (String) i1.get("fid");
                                             String taskId = getShareTaskId(fid, secondDir, urlType, expiredType, null);
                                             String shareId = getShareId(taskId);
                                             String sharedUrl = submitShare(shareId);
-                                            logger.info(n + ".分享成功 " + firstDir + "/" + secondDir + " 文件夹"+sharedUrl);
-                                            try (BufferedWriter writer = new BufferedWriter(new FileWriter(saveSharePath, true))) {
-                                                String content = n + " | " + firstDir + " | " + secondDir + " | " + shareUrl;
-                                                writer.write(content + "\n");
-                                                logger.info(n + ".分享成功 " + firstDir + "/" + secondDir + " 文件夹");
-                                                shareSuccess = true;
-                                                break;
-                                            }
+                                            logger.info(n + ".分享成功 " +  secondDir + " 文件夹"+sharedUrl);
+                                            video.setUrl(sharedUrl);
+                                            video.setProcess(CommonConstant.DOWNLOAD_STATUS_UPLOAD);
+                                            videoMapper.updateById(video);
                                         } catch (Exception e) {
                                             logger.error("分享失败：",e);
+                                            video.setProcess(CommonConstant.DOWNLOAD_STATUS_UPLOAD_ERROR);
+                                            videoMapper.updateById(video);
                                             shareErrorMsg = e.getMessage();
                                             error++;
                                         }
