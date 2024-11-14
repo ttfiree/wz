@@ -9,7 +9,7 @@ version = '0.0.1-SNAPSHOT'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
@@ -52,10 +52,17 @@ dependencies {
 
 
     implementation 'org.xerial:sqlite-jdbc:3.41.2.2' // 添加 SQLite JDBC 驱动
-    implementation 'com.baomidou:mybatis-plus-boot-starter:3.5.9'
-    implementation 'com.baomidou:mybatis-plus-generator:3.5.9'
+    implementation 'com.baomidou:mybatis-plus-spring-boot3-starter:3.5.9'
+    implementation 'com.baomidou:mybatis-plus-generator:3.5.3'
+    // Velocity 引擎，用于代码生成
+    implementation 'org.apache.velocity:velocity-engine-core:2.3'
     implementation 'org.freemarker:freemarker:2.3.31'
-
+    //com.microsoft.playwright
+    implementation 'com.microsoft.playwright:playwright:1.36.0'
+    //commons-io 2.11
+    implementation 'commons-io:commons-io:2.11.0'
+    //fastjson
+    implementation 'com.alibaba:fastjson:1.2.78'
 }
 
 tasks.named('test') {

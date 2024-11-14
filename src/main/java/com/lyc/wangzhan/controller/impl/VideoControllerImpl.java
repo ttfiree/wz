@@ -2,6 +2,9 @@ package com.lyc.wangzhan.controller.impl;
 
 import cn.hutool.http.HttpUtil;
 import com.lyc.wangzhan.controller.VideoController;
+import com.lyc.wangzhan.entity.Video;
+import com.lyc.wangzhan.login.LoginService;
+import com.lyc.wangzhan.mapper.VideoMapper;
 import com.lyc.wangzhan.utils.*;
 import com.lyc.wangzhan.video.TotalService;
 import com.lyc.wangzhan.video.VideoService;
@@ -25,6 +28,7 @@ import java.net.HttpCookie;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +48,11 @@ public class VideoControllerImpl implements VideoController {
     @Value("${cookie}")
     private String cookie;
 
+    @Autowired
+    private VideoMapper videoMapper;
+
+    @Autowired
+    private LoginService loginService;
     @Override
     public void downloadImg(List<String> urls) throws IOException {
 
@@ -123,6 +132,12 @@ public class VideoControllerImpl implements VideoController {
         }
         System.out.println(avids);
     }
+
+    @Override
+    public void test(String spaceId) throws IOException {
+        loginService.shareRun(spaceId);
+    }
+
     public void getAid(String url) {
         String html = HttpUtil.get(url);
         Document document = Jsoup.parse(html);

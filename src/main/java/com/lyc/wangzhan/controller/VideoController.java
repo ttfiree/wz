@@ -25,4 +25,7 @@ public interface VideoController {
     @RequestMapping(value = "/list.do",method = RequestMethod.POST)
     public void list(@RequestBody String spaceId) throws IOException;
 
+    @RequestMapping(value = "/test.do",method = RequestMethod.POST)
+    public void test(@RequestBody String spaceId) throws IOException;
+
 }
