@@ -28,4 +28,11 @@ public interface VideoController {
     @RequestMapping(value = "/test.do",method = RequestMethod.POST)
     public void test(@RequestBody String spaceId) throws IOException;
 
+
+    /**
+     * 处理文件
+     */
+    @RequestMapping(value = "/deal.do",method = RequestMethod.POST)
+    public void deal(@RequestBody String title) throws IOException;
+
 }

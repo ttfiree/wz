@@ -2,7 +2,7 @@ spring:
   application:
     name: wangzhan
   datasource:
-    url: jdbc:sqlite:D:/wz/bilibili.db
+    url: jdbc:sqlite:K:\wz\src\main\resources\bilibili.db
     driver-class-name: org.sqlite.JDBC
     # SQLite 不需要用户名和密码
     username:

@@ -19,15 +19,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PathUtil {
-    private static String path = "N:\\Bilibili";
-    private static String pathPic = "N:\\Bilibilipic";
+    public static String path = "N:\\Bilibili";
+    public static String pathPic = "N:\\Bilibilipic";
 
-    private static String outPath = "N:\\BiliBiliOutput";
+    public static String outPath = "N:\\BiliBiliOutput";
 
-    private static String quarkPath = "N:\\网站";
+    public static String quarkPath = "N:\\网站";
 
-    private static String downLoadPath = "N:\\下载";
-    private static String dealPath = "N:\\待压缩";
+    public static String downLoadPath = "N:\\下载";
+    public static String dealPath = "N:\\待压缩";
 
     //创建图片路径
     public static String createImagePath(String cover,String title) {
@@ -71,7 +71,7 @@ public class PathUtil {
         return fileName;
     }
     //将文件夹7z压缩
-    public static void compressFolder(String title) {
+    public static String compressFolder(String title) {
         String folderPath = outPath + File.separator + title;
         //获取当前日期yyyy-MM-dd
         String date = LocalDate.now().toString();
@@ -86,6 +86,7 @@ public class PathUtil {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        return archivePath;
     }
     public static void compressFolderDownload(String title) {
         String folderPath = downLoadPath + File.separator + title;

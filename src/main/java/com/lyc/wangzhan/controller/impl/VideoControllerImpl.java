@@ -1,7 +1,10 @@
 package com.lyc.wangzhan.controller.impl;
 
 import cn.hutool.http.HttpUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.lyc.wangzhan.constant.CommonConstant;
 import com.lyc.wangzhan.controller.VideoController;
+import com.lyc.wangzhan.entity.Video;
 import com.lyc.wangzhan.service.login.LoginService;
 import com.lyc.wangzhan.mapper.VideoMapper;
 import com.lyc.wangzhan.service.wordpress.WordpressService;
@@ -21,14 +24,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpCookie;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import static com.lyc.wangzhan.utils.PathUtil.outPath;
 
 
 @RestController( "/video")
@@ -137,6 +144,27 @@ public class VideoControllerImpl implements VideoController {
     public void test(String spaceId) throws IOException {
         //loginService.shareRun(spaceId);
         wordpressService.uploadMedia(spaceId);
+    }
+
+    @Override
+    public void deal(String title) throws IOException {
+        Video video = new Video();
+        video.setName(title);
+        video.setIs_del(0);
+        video = videoMapper.selectOne(new QueryWrapper(video));
+        if(video == null){
+            video = new Video();
+            video.setName(title);
+            video.setIs_del(0);
+            video.setCreateTime(new Date());
+            videoMapper.insert(video);
+            video = videoMapper.selectOne(new QueryWrapper(video));
+        }
+        PathUtil.compressFolderDownload(title);
+        video.setPic_path(outPath + File.separator + title);
+        PathUtil.moveFileQuark(title);
+        video.setProcess(CommonConstant.DOWNLOAD_STATUS_COMPRESS);
+        videoMapper.updateById(video);
     }
 
     public void getAid(String url) {
